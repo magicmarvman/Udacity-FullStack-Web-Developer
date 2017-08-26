@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<ul>
+  {% for u in users_ %}
+    <li>{{u.name}} (<a href="/user/{{u.key().id()}}">Profile</a>)</li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

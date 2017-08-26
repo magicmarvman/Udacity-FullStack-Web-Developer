@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Edit #{{comment.key().id()}} on post #{{comment.post.key().id()}}</h1>
+<form action='/blog/commentsubmitedit' method='post'>
+<input type='hidden' name='id' value='{{comment.key().id()}}'>
+content<br>
+<textarea name='content'>{{comment.content}}</textarea>
+<br><input type='submit' value='update'>
+</form>
+{% endblock %}

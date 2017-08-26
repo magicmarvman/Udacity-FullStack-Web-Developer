@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>{{post.subject}} by {{post.creator.name}} (#{{post.creator.key().id()}})</h2>
+  <p>{{post.content}}</p>
+  <hr>
+  <a href="/blog/edit?postid={{post.key().id()}}">Edit</a>
+  
+  <div class='comments'>
+  {% for comment in post.comments.order("created").filter("shown = ",True) %}
+  <a id="{{comment.key().id()}}"></a>
+  <div class='comment'>
+  <p><b>{{comment.user.name}} <a href="#{{comment.key().id()}}">#{{comment.key().id()}}</a>:&nbsp;</b>{{comment.content}} (<a href='/blog/deletecomment?postid={{comment.key().id()}}'>Delete</a>, <a href='/blog/editcomment?postid={{comment.key().id()}}'>Edit</a>)</p>
+  {% if self.user %}
+  {% if User.get_by_id(int(self.user.key().id())) == User.get_by_id(int(comment.user.key().id())) %}
+  <a href="/blog/deletecomment/{{comment.key().id()}}">Delete</a>
+  {% endif %}
+  {% endif %}
+  <hr>
+  </div>
+  {% endfor %}
+  </div>
+  <p><a href="/blog/like/?id={{post.key().id()}}">Like</a>&nbsp;({{post.likes.count()}})</p>
+  <form method="post" action="/blog/{{post.key().id()}}/newcomment">
+  	<h3>Write a comment</h3>
+  	<input type="hidden" name="postid" value="{{post.key().id()}}">
+  	<textarea name="comment" rows="5" cols="50" class="commentbox"></textarea>
+  	<br>
+  	<input type="submit" value="Publish">
+  </form>
+{% endblock %}

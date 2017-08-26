@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>{{post.name}}: {{post.status}}</h2>
+  <p>{{post.about}}</p>
+  {% if self.user %}
+    {% if self.user == post %}
+    <a href='/user/{{post.key().id()}}/edit'>edit</a>
+    {% endif %}
+  {% endif %}
+  <hr>
+{% endblock %}

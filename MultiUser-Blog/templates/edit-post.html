@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Edit #{{post.key().id()}}</h2>
+<form action='/blog/submitedit' method='post'>
+subject<br>
+<input type='text' name='subject' value='{{post.subject}}' required='required'><br>
+content<br>
+<textarea name='content' required='required' rows='5' cols='50'>{{post.content}}</textarea><br>
+<input type='hidden' name='id' value='{{post.key().id()}}'>
+<input type='submit' value='publish'>&nbsp;&nbsp;<input type='reset' value='reset'>
+</form>
+{% endblock %}
