@@ -190,38 +190,39 @@ class AddLike(MainHandle):
                 "error.html", error="You must be logged in, to do that!")
         else:
             connuser = User.get_by_id(int(self.user.key().id()))
-            if User.get_by_id(int(self.user.key().id())) == User.get_by_id(int(post.creator.key().id())):
+            if self.user.key().id() == post.creator.key().id():
                 self.render(
                     "error.html", error="You can't like your own posts!")
             else:
 
                 author = post.creator.key().id()
-                if author == self.user:
+                if User.get_by_id(author) == User.get_by_id(self.user):
                     self.render(
                         "error.html", error="You can't like your own posts!")
                 else:
-                    if Like.all().filter('post =', post).filter('creator =', self.user).count():
+                    if Like.all().filter('post=', post).filter('creator=', self.user).count():
                         self.render(
                             "error.html", error="You already liked this post!")
                     else:
                         creator_ = self.user
                         like = Like(creator=creator_, post=post)
                         like.put()
-                        self.redirect("/blog/refresh?id=%s" %
-                                      str(self.request.get("id")))
+                        return self.redirect("/blog/refresh?id=%s" %
+                                             str(self.request.get("id")))
 
 
 class RefreshPermalink(MainHandle):
 
     def get(self):
 
-        
-        self.redirect("/blog/refresh2?id="+str(self.request.get("id"))+"&timesr=2")
+        return self.redirect("/blog/refresh2?id=" +
+                             str(self.request.get("id"))+"&timesr=2")
+
 
 class RefreshPermalink_(MainHandle):
-    def get(self):
-        self.redirect("/blog/%s" % str(self.request.get("id")))
 
+    def get(self):
+        return self.redirect("/blog/%s" % str(self.request.get("id")))
 
 
 class PostComment(MainHandle):
@@ -239,8 +240,8 @@ class PostComment(MainHandle):
             comment_ = Comment(post=post, content=content,
                                user=user, shown=True)
             comment_.put()
-            self.redirect("/blog/refresh?id=%s" %
-                          str(self.request.get("postid")))
+            return self.redirect("/blog/refresh?id=%s" %
+                                 str(self.request.get("postid")))
 
 
 class RequestChangeBlog(MainHandle):
@@ -267,17 +268,20 @@ class RequestChangeBlog(MainHandle):
         else:
             post = Post.get_by_id(
                 int(self.request.get("postid")), parent=blog_key())
-            user = self.user
-            if post.creator != user:
-                self.render(
-                    "error.html", error="You aren't the creator of this post!")
+            if post is not None:
+                user = self.user
+                if post.creator != user:
+                    self.render(
+                        "error.html", error="You aren't the creator of this post!")
+                else:
+                    content = self.request.get("content")
+                    subject = self.request.get("subject")
+                    post.content = content
+                    post.subject = subject
+                    post.put()
+                    return self.redirect("/blog/%s" % str(post.key().id()))
             else:
-                content = self.request.get("content")
-                subject = self.request.get("subject")
-                post.content = content
-                post.subject = subject
-                post.put()
-                self.redirect("/blog/%s" % str(post.key().id()))
+                self.render("error.html", error="This post doesn't exist!")
 
 
 class CommitChangeBlog(MainHandle):
@@ -299,7 +303,7 @@ class CommitChangeBlog(MainHandle):
                 post.subject = subject_
                 post.content = content_
                 post.put()
-                self.redirect("/blog/refresh/%s" % str(post.key().id()))
+                return self.redirect("/blog/refresh/%s" % str(post.key().id()))
 
 
 class DeleteComment(MainHandle):
@@ -312,13 +316,38 @@ class DeleteComment(MainHandle):
             self.render(
                 "error.html", error="You must be logged in, to do that!")
         else:
-            if comment.user.key().id() != int(self.user.key().id()):
-                self.render("error.html", error="This isn't your comment!")
+            if comment is not None:
+                if comment.user.key().id() != int(self.user.key().id()):
+                    self.render("error.html", error="This isn't your comment!")
+                else:
+                    comment2 = Comment.get_by_id(int(comment_id))
+                    comment2.shown = False
+                    comment2.put()
+                    return self.redirect("/blog/%s" % str(post_id))
             else:
-                comment2 = Comment.get_by_id(int(comment_id))
-                comment2.shown = False
-                comment2.put()
-                self.redirect("/blog/%s" % str(post_id))
+                self.render("error.html", error="This comment does not exist!")
+
+
+class DeletePost(MainHandle):
+
+    def get(self):
+        comment_id = int(self.request.get("postid"))
+        comment = Post.get_by_id(int(comment_id))
+        post_id = comment.post.key().id()
+        if not self.user:
+            self.render(
+                "error.html", error="You must be logged in, to do that!")
+        else:
+            if comment is not None:
+                if comment.user.key().id() != int(self.user.key().id()):
+                    self.render("error.html", error="This isn't your comment!")
+                else:
+                    comment2 = Comment.get_by_id(int(comment_id))
+                    comment2.shown = False
+                    comment2.put()
+                    return self.redirect("/blog/%s" % str(post_id))
+            else:
+                self.render("error.html", error="This comment does not exist!")
 
 
 class ChangeComment(MainHandle):
@@ -328,15 +357,20 @@ class ChangeComment(MainHandle):
         comment = Comment.get_by_id(comment_id)
 
         if not comment:
-            self.render("error.html",error="Sorry, but this comment doesn't exist")
+            self.render(
+                "error.html", error="Sorry, but this comment doesn't exist")
         else:
             if not self.user:
-                self.render("error.html",error="You must be logged in, to do that!")
+                self.render(
+                    "error.html", error="You must be logged in, to do that!")
             else:
                 if User.get_by_id(int(comment.user.key().id())) != User.get_by_id(int(self.user.key().id())):
-                    self.render("error.html",error="You aren't the creator of this comment!")
+                    self.render(
+                        "error.html", error="You aren't the creator of this comment!")
                 else:
-                    self.render("edit-comment.html",comment=comment,user=self.user)
+                    self.render("edit-comment.html",
+                                comment=comment, user=self.user)
+
 
 class SubmitChangeComment(MainHandle):
 
@@ -345,21 +379,25 @@ class SubmitChangeComment(MainHandle):
         content = str(self.request.get("content"))
 
         if not comment_id and not content:
-            self.render("error.html",error="Both comment id and content, please, dear System!")
+            self.render(
+                "error.html", error="Both comment id and content, please, dear System!")
         else:
             if not self.user:
-                self.render("error.html",error="You must be logged in, to do that!")
-            else:  
+                self.render(
+                    "error.html", error="You must be logged in, to do that!")
+            else:
                 if User.get_by_id(Comment.get_by_id(comment_id).user.key().id()) != User.get_by_id(self.user.key().id()):
-                    self.render("error.html",error="You aren't the creator of this comment!")
+                    self.render(
+                        "error.html", error="You aren't the creator of this comment!")
                 else:
                     comment = Comment.get_by_id(comment_id)
                     if not comment:
-                        self.render("error.html",error="Invalid comment!")
+                        self.render("error.html", error="Invalid comment!")
                     else:
                         comment.content = content
                         comment.put()
-                        self.redirect("/blog/refresh?id=%s" % str(comment.post.key().id()))        
+                        return self.redirect("/blog/refresh?id=%s" %
+                                             str(comment.post.key().id()))
 
 
 class BlogFront(MainHandle):
@@ -386,14 +424,12 @@ class PostPage(MainHandle):
             self.error(404)
             return
 
-        
-
         self.render("permalink.html", post=post)
 
 # class DeletePosts(MainHandle):
         # def get(self):
-        #query = Post.all(keys_only=True)
-        #entries =db.fetch(1000)
+        # query = Post.all(keys_only=True)
+        # entries =db.fetch(1000)
         # db.delete(entries)
 
 
@@ -419,7 +455,7 @@ class NewPost(MainHandle):
             p = Post(parent=blog_key(), subject=subject,
                      content=content, creator=creator)
             p.put()
-            self.redirect('/blog/%s' % str(p.key().id()))
+            return self.redirect('/blog/%s' % str(p.key().id()))
         else:
             error = "subject and content, please! :)"
             self.render("newpost.html", subject=subject,
@@ -489,7 +525,7 @@ class RegisterUser(SignupUser):
             u.put()
 
             self.login(u)
-            self.redirect('/blog')
+            return self.redirect('/blog')
 
 
 class LoginUser(MainHandle):
@@ -504,7 +540,7 @@ class LoginUser(MainHandle):
         u = User.login(username, password)
         if u:
             self.login(u)
-            self.redirect('/blog')
+            return self.redirect('/blog')
         else:
             msg = 'Invalid login data :('
             self.render('login-form.html', error=msg)
@@ -514,7 +550,7 @@ class LogOutUser(MainHandle):
 
     def get(self):
         self.logout()
-        self.redirect('/blog')
+        return self.redirect('/blog')
 
 
 class WelcomeUser(MainHandle):
@@ -523,7 +559,7 @@ class WelcomeUser(MainHandle):
         if self.user:
             self.render('welcome.html', username=self.user.name)
         else:
-            self.redirect('/signup')
+            return self.redirect('/signup')
 
 
 class ImATeapot(webapp2.RequestHandler):
@@ -541,9 +577,9 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/blog/[0-9]+/newcomment', PostComment),
                                ('/blog/deletecomment', DeleteComment),
                                ('/blog/edit', RequestChangeBlog),
-                               ('/blog/editcomment',ChangeComment),
-                               ('/blog/commentsubmitedit',SubmitChangeComment),
-                               ('/blog/refresh2',RefreshPermalink_),
+                               ('/blog/editcomment', ChangeComment),
+                               ('/blog/commentsubmitedit', SubmitChangeComment),
+                               ('/blog/refresh2', RefreshPermalink_),
                                ('/blog/submitedit', CommitChangeBlog),
                                ('/user/([0-9]+)', ProfilePage),
                                ('/blog/newpost', NewPost),
