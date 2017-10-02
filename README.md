@@ -1,7 +1,7 @@
-## Udacity FullStack
+# Udacity FullStack
 
 
-# This REPO contains:
+## This REPO contains:
 This repository contains all my udacity nanodegree course stuff.
 
 -- MultiUserBlog: contains project multiuserblog of module2 (PROJECT CANCELLED BY UDACITY)
