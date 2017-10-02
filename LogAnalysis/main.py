@@ -4,7 +4,7 @@ import time
 
 
 def clear_shell():
-	os.system("clear")
+    os.system("clear")
 
 
 clear_shell()
@@ -69,25 +69,24 @@ print("Loading daily logs... This may take a little while!")
 
 for x in log:
 
-	dlog = x[4].strftime("%d. %B %Y")
-	dic = {"date": dlog, "errors": 0}
+    dlog = x[4].strftime("%d. %B %Y")
+    dic = {"date": dlog, "errors": 0}
 
-	if(dic not in found):
-		found.append(dic)
+    if(dic not in found):
+        found.append(dic)
 
-    
+
 daily_log = found
 
 for x in daily_log:
-	for y in log:
-		dlog = y[4].strftime("%d. %B %Y") 
-		if(dlog == x["date"]):
-			if(y[3] != "200 OK"):
-				x["errors"] += 1
+    for y in log:
+        dlog = y[4].strftime("%d. %B %Y")
+        if(dlog == x["date"]):
+            if(y[3] != "200 OK"):
+                x["errors"] += 1
 
 daily_log = sorted(daily_log, key=lambda x: int(x["errors"]))
 daily_log.reverse()
-
 
 
 clear_shell()
@@ -180,24 +179,25 @@ def print_logdays():
         print("====================================================")
         print("Day: "+str(x["date"]))
 
+
 def print_error_ranking():
-	i = 1
-	print("Error days: \n")
-	for x in daily_log:
-		if i < 4:
-			i += 1
-			print("=======================================")
-			print("Date: "+x["date"])
-			print("Errors: "+str(x["errors"]))
-		else:
-			break
+    i = 1
+    print("Error days: \n")
+    for x in daily_log:
+        if i < 4:
+            i += 1
+            print("=======================================")
+            print("Date: "+x["date"])
+            print("Errors: "+str(x["errors"]))
+        else:
+            break
 
 
 # article_meta()
 # print_articles()
 # print(logFirst)
 # all_logs()
-#print(str(pages_log))
+# print(str(pages_log))
 print_article_ranking()
 print("\n\n")
 print_author_ranking()
@@ -206,5 +206,4 @@ print_error_ranking()
 
 # print("\n\n\n")
 # print_logdays()
-#print(str(daily_log))
-
+# print(str(daily_log))
