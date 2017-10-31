@@ -4,4 +4,4 @@
 - **[Neighborhood-Map](http://map.udacity.marvnet.de)** (_accessible online_)
 - **MultiUser-Blog**
 - **Movie Trailer Page**
-- **_ More will come! _**
+- **_More will come!_**
