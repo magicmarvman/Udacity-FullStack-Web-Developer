@@ -1,0 +1,7 @@
+oauth2client
+autopep8
+Flask
+Jinja2
+requests
+SQLAlchemy
+Werkzeug
